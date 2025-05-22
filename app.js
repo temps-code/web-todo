@@ -1,59 +1,78 @@
 const apiUrl = "https://682f9602f504aa3c70f4833b.mockapi.io/api/todo/task";
 
 const taskList = document.getElementById("taskList");
+const taskInput = document.getElementById("taskInput");
+const addBtn = document.getElementById("addBtn");
 
-// Función para renderizar tareas con checkbox
+// Mostrar tareas con checkbox para marcar como hechas
 function renderTasks(tasks) {
   taskList.innerHTML = "";
-  tasks.forEach(task => {
+  tasks.forEach((task) => {
     const li = document.createElement("li");
-    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.className = "list-group-item d-flex align-items-center";
 
-    // Checkbox para marcar done
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = task.done;
-    checkbox.addEventListener("change", () => updateTask(task.id, checkbox.checked));
-
-    const span = document.createElement("span");
-    span.textContent = task.text;
+    checkbox.className = "form-check-input me-2";
+    checkbox.addEventListener("change", () => {
+      updateTask(task.id, checkbox.checked);
+    });
 
     li.appendChild(checkbox);
-    li.appendChild(span);
-
+    li.appendChild(document.createTextNode(task.text));
     taskList.appendChild(li);
   });
 }
 
-// Función para actualizar tarea (PUT)
+// Actualizar tarea (PUT) en la API
 async function updateTask(id, done) {
   try {
     const response = await fetch(`${apiUrl}/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ done }),
     });
-
     if (!response.ok) throw new Error("Error al actualizar la tarea");
-
-    console.log(`Tarea ${id} actualizada a done = ${done}`);
+    // Opcional: refrescar la lista para asegurarse que quedó actualizado
+    fetchTasks();
   } catch (error) {
-    console.error(error);
+    console.error("Error en updateTask:", error);
   }
 }
 
-// Ejemplo: cargar tareas (puedes implementarlo luego)
+// Crear tarea (POST) en la API
+async function createTask(text) {
+  try {
+    if (!text.trim()) return;
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text.trim(), done: false }),
+    });
+    if (!response.ok) throw new Error("Error al crear la tarea");
+    taskInput.value = "";
+    fetchTasks(); // Actualizar la lista
+  } catch (error) {
+    console.error("Error en createTask:", error);
+  }
+}
+
+// Obtener tareas (GET) y mostrarlas
 async function fetchTasks() {
   try {
     const response = await fetch(apiUrl);
     const tasks = await response.json();
     renderTasks(tasks);
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener tareas:", error);
   }
 }
 
-// Al cargar la página, traer tareas
+// Evento para el botón "Add Task"
+addBtn.addEventListener("click", () => {
+  createTask(taskInput.value);
+});
+
+// Cargar las tareas cuando se cargue la página
 fetchTasks();
