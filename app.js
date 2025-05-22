@@ -1,42 +1,58 @@
-const apiURL = "https://682f9602f504aa3c70f4833b.mockapi.io/api/todo/task";
+// URL única para todas las operaciones
+const API_URL = "https://682f9602f504aa3c70f4833b.mockapi.io/api/todo/task";
 
-const addBtn = document.getElementById("addBtn");
+// SELECTORES
+const addBtn    = document.getElementById("addBtn");
 const taskInput = document.getElementById("taskInput");
+const taskList  = document.getElementById("taskList");
 
+// FUNCIONALIDAD: leer tareas
+async function listarTareas() {
+  try {
+    const response = await fetch(API_URL);
+    const tareas   = await response.json();
+    taskList.innerHTML = "";
+
+    tareas.forEach((tarea) => {
+      const item = document.createElement("li");
+      item.textContent = `${tarea.text} - ${
+        tarea.done ? "✔️ Completada" : "❌ Pendiente"
+      }`;
+      taskList.appendChild(item);
+    });
+  } catch (error) {
+    console.error("Error al obtener tareas:", error);
+  }
+}
+
+// FUNCIONALIDAD: crear tarea
 async function createTask() {
   const taskText = taskInput.value.trim();
-
-  if (taskText === "") {
+  if (!taskText) {
     alert("Por favor, escribe una tarea.");
     return;
   }
 
-  const newTask = {
-    text: taskText,
-    done: false,
-  };
-
   try {
-    const response = await fetch(apiURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newTask),
+    const response = await fetch(API_URL, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ text: taskText, done: false })
     });
 
-    if (response.ok) {
-      const createdTask = await response.json();
-      console.log("Tarea creada:", createdTask);
-      taskInput.value = ""; // Limpiar el input
-      alert("Tarea agregada correctamente ✅");
-    } else {
-      throw new Error("Error al crear tarea");
-    }
+    if (!response.ok) throw new Error("Error al crear tarea");
+    await response.json();
+    taskInput.value = "";               // limpiar input
+    alert("Tarea agregada correctamente ✅");
+    listarTareas();                     // refrescar lista
   } catch (error) {
     console.error("Error:", error);
     alert("Hubo un error al agregar la tarea ❌");
   }
 }
 
+// EVENTOS
 addBtn.addEventListener("click", createTask);
+
+// Al cargar la página, listamos tareas
+listarTareas();
