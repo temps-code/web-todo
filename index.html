@@ -26,11 +26,24 @@
     </div>
 
     <!-- Formulario para eliminar tarea por ID -->
-    <div class="input-group mb-4">
+    <div class="input-group mb-3">
       <input type="text" id="deleteIdInput" class="form-control"
              placeholder="Ingresa el ID de la tarea a eliminar" aria-label="ID tarea a eliminar"/>
       <button class="btn btn-danger" id="deleteByIdBtn" type="button">
         Eliminar por ID
+      </button>
+    </div>
+
+    <!-- Formulario para actualizar estado de tarea por ID -->
+    <div class="input-group mb-4">
+      <input type="text" id="updateIdInput" class="form-control"
+             placeholder="ID de tarea a actualizar" aria-label="ID tarea a actualizar"/>
+      <select id="updateStatusSelect" class="form-select">
+        <option value="false">❌ Pendiente</option>
+        <option value="true">✔️ Completada</option>
+      </select>
+      <button class="btn btn-secondary" id="updateBtn" type="button">
+        Actualizar Estado
       </button>
     </div>
 

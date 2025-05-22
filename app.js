@@ -2,28 +2,45 @@
 const API_URL = "https://682f9602f504aa3c70f4833b.mockapi.io/api/todo/task";
 
 // SELECTORES
-const addBtn        = document.getElementById("addBtn");
-const taskInput     = document.getElementById("taskInput");
-const taskList      = document.getElementById("taskList");
-const deleteByIdBtn = document.getElementById("deleteByIdBtn");
-const deleteIdInput = document.getElementById("deleteIdInput");
+const addBtn          = document.getElementById("addBtn");
+const taskInput       = document.getElementById("taskInput");
+const taskList        = document.getElementById("taskList");
+const deleteByIdBtn   = document.getElementById("deleteByIdBtn");
+const deleteIdInput   = document.getElementById("deleteIdInput");
 
-// FUNCIONALIDAD: leer tareas
+// (Opcional) selectores para formulario de actualización por ID
+const updateBtn       = document.getElementById("updateBtn");
+const updateIdInput   = document.getElementById("updateIdInput");
+const updateStatusSel = document.getElementById("updateStatusSelect");
+
+/**
+ * Listar tareas y renderizar
+ */
 async function listarTareas() {
   try {
-    const response = await fetch(API_URL);
-    const tareas   = await response.json();
+    const res    = await fetch(API_URL);
+    const tareas = await res.json();
     taskList.innerHTML = "";
 
-    tareas.forEach((tarea) => {
+    tareas.forEach(tarea => {
       const item = document.createElement("li");
       item.className = "list-group-item d-flex justify-content-between align-items-center";
 
-      item.innerHTML = `
-        <span>${tarea.text} - ${tarea.done ? "✔️ Completada" : "❌ Pendiente"}</span>
-        <button class="btn btn-danger btn-sm" onclick="deleteTask('${tarea.id}')">Eliminar</button>
-      `;
+      // Checkbox inline para actualizar estado
+      const checkbox = `<input type="checkbox" ${tarea.done ? "checked" : ""} 
+        onchange="toggleTaskStatus('${tarea.id}', this.checked)" />`;
 
+      item.innerHTML = `
+        <div>
+          ${checkbox}
+          <span class="${tarea.done ? "text-decoration-line-through" : ""}">
+            ${tarea.text}
+          </span>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteTask('${tarea.id}')">
+          Eliminar
+        </button>
+      `;
       taskList.appendChild(item);
     });
   } catch (error) {
@@ -31,54 +48,82 @@ async function listarTareas() {
   }
 }
 
-// FUNCIONALIDAD: crear tarea
+/**
+ * Crear tarea
+ */
 async function createTask() {
-  const taskText = taskInput.value.trim();
-  if (!taskText) {
+  const text = taskInput.value.trim();
+  if (!text) {
     alert("Por favor, escribe una tarea.");
     return;
   }
 
   try {
-    const response = await fetch(API_URL, {
+    const res = await fetch(API_URL, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ text: taskText, done: false })
+      body:    JSON.stringify({ text, done: false }),
     });
-
-    if (!response.ok) throw new Error("Error al crear tarea");
-    await response.json();
-    taskInput.value = "";               // limpiar input
-    alert("Tarea agregada correctamente ✅");
-    listarTareas();                     // refrescar lista
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Hubo un error al agregar la tarea ❌");
+    if (!res.ok) throw new Error("Error al crear tarea");
+    taskInput.value = "";
+    alert("Tarea agregada ✅");
+    listarTareas();
+  } catch (err) {
+    console.error(err);
+    alert("Error al agregar la tarea ❌");
   }
 }
 
-// FUNCIONALIDAD: eliminar tarea
+/**
+ * Eliminar tarea
+ */
 async function deleteTask(id) {
-  const confirmDelete = confirm("¿Estás seguro de que deseas eliminar esta tarea?");
-  if (!confirmDelete) return;
-
+  if (!confirm("¿Eliminar esta tarea?")) return;
   try {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) throw new Error("Error al eliminar tarea");
-    alert("Tarea eliminada correctamente ✅");
-    listarTareas(); // refrescar lista
-  } catch (error) {
-    console.error("Error al eliminar tarea:", error);
-    alert("Hubo un error al eliminar la tarea ❌");
+    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Error al eliminar");
+    alert("Tarea eliminada ✅");
+    listarTareas();
+  } catch (err) {
+    console.error(err);
+    alert("Error al eliminar tarea ❌");
   }
+}
+
+/**
+ * Actualizar estado de una tarea (PUT)
+ */
+async function toggleTaskStatus(id, done) {
+  try {
+    const res = await fetch(`${API_URL}/${id}`, {
+      method:  "PUT",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ done }),
+    });
+    if (!res.ok) throw new Error("Error al actualizar estado");
+    listarTareas();
+  } catch (err) {
+    console.error(err);
+    alert("Error al actualizar estado ❌");
+  }
+}
+
+// (Opcional) Actualizar por formulario
+if (updateBtn) {
+  updateBtn.addEventListener("click", async () => {
+    const id   = updateIdInput.value.trim();
+    const done = updateStatusSel.value === "true";
+    if (!id) {
+      alert("Ingresa un ID válido.");
+      return;
+    }
+    await toggleTaskStatus(id, done);
+    updateIdInput.value = "";
+  });
 }
 
 // EVENTOS
 addBtn.addEventListener("click", createTask);
-
 deleteByIdBtn.addEventListener("click", async () => {
   const id = deleteIdInput.value.trim();
   if (!id) {
@@ -86,8 +131,8 @@ deleteByIdBtn.addEventListener("click", async () => {
     return;
   }
   await deleteTask(id);
-  deleteIdInput.value = ""; // limpiar input después de eliminar
+  deleteIdInput.value = "";
 });
 
-// Al cargar la página, listamos tareas
+// Al cargar la página
 listarTareas();
