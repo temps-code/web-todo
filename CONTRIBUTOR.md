@@ -1,6 +1,6 @@
-# Guia para Contributors de Web To-Do List
+# Guía para Contributors de Web To-Do List
 
-Este documento está dirigido exclusivamente a los **contributors** que colaborarán en el proyecto **Web To-Do List**. Aquí encontrarás el flujo de trabajo, las ramas de desarrollo y las pautas para enviar tus cambios.
+Este documento está dirigido exclusivamente a los **contributors** que colaborarán en el proyecto **Web To-Do List**. Encontrarás el flujo de trabajo, cómo sincronizar tu fork y ramas, así como las pautas para enviar y mantener actualizados tus cambios.
 
 ---
 
@@ -11,7 +11,7 @@ Este documento está dirigido exclusivamente a los **contributors** que colabora
    # Con Git tradicional:
    git clone https://github.com/<tu-usuario>/web-todo.git
 
-   # O (recomendado) con GitHub CLI para mayor facilidad:
+   # O (recomendado) con GitHub CLI:
    gh repo clone <tu-usuario>/web-todo
 
    cd web-todo
@@ -24,22 +24,78 @@ Este documento está dirigido exclusivamente a los **contributors** que colabora
 
 ---
 
-## 2. Flujo de trabajo por rama
+## 2. Sincronizar tu fork con el repositorio original
 
-Para cada funcionalidad, sigue este patrón:
+Antes de empezar nuevos cambios y periódicamente para mantener tu fork actualizado:
 
-1. **Actualiza `main`**:
+1. Trae los cambios del original:
+   ```bash
+   git fetch upstream
+   ```
+2. Cámbiate a tu rama principal local:
    ```bash
    git switch main
-   git pull upstream main  # o `git pull origin main` si no usas fork
    ```
+3. Incorpora los cambios de `upstream/main` a tu `main`:
+   ```bash
+   # Con merge:
+   git merge upstream/main
+
+   # O con rebase para historial lineal:
+   git rebase upstream/main
+   ```
+4. Envía tu `main` actualizado a tu fork:
+   ```bash
+   git push origin main
+   ```
+
+> **Tip:** Si tu fork está muy desfasado, usa rebase y luego:
+> ```bash
+> git push --force-with-lease origin main
+> ```
+
+---
+
+## 3. Sincronizar una rama específica
+
+Para mantener tus ramas de feature alineadas con la misma rama en el original:
+
+1. Trae cambios del original:
+   ```bash
+   git fetch upstream
+   ```
+2. Cámbiate a tu rama de trabajo:
+   ```bash
+   git switch feature/<tu-acción>
+   ```
+3. Fusiona o rebasea con la rama upstream:
+   ```bash
+   # Merge:
+   git merge upstream/feature/<tu-acción>
+
+   # Rebase (historial limpio):
+   git rebase upstream/feature/<tu-acción>
+   ```
+4. Resolver posibles conflictos (ver sección de Merge Conflicts).
+5. Push de la rama sincronizada:
+   ```bash
+   git push origin feature/<tu-acción>
+   ```
+
+---
+
+## 4. Flujo de trabajo por rama
+
+Para cada nueva funcionalidad sigue este patrón:
+
+1. **Actualiza `main`** (ver sección 2).
 2. **Crea una rama específica**:
    ```bash
-   git switch -c feature/<acción>  # ejemplo: feature/create-task
+   git switch -c feature/<acción>
    ```
 3. **Desarrolla tu feature**:
    - Implementa solo la funcionalidad asignada.
-   - Mantén commits atómicos y claros.
+   - Mantén commits atómicos y claros:
      ```bash
      git add <archivos>
      git commit -m "feat: descripción clara de tu cambio"
@@ -49,14 +105,13 @@ Para cada funcionalidad, sigue este patrón:
    git push origin feature/<acción>
    ```
 5. **Abre un Pull Request** en GitHub:
-   - Base: `owner-usuario/web-todo:main`  
-   - Compare: tu rama `feature/<acción>`  
-   - Título: breve y descriptivo (`feat: create task endpoint`)  
-   - Descripción: explica qué hace tu cambio y cómo probarlo.
+   - Base: `owner-usuario/web-todo:main`
+   - Compare: tu rama `feature/<acción>`
+   - Título y descripción claros.
 
 ---
 
-## 3. Ramas de desarrollo (una por cada acción CRUD)
+## 5. Ramas de desarrollo (una por cada acción CRUD)
 
 | Rama                          | Acción                          |
 |-------------------------------|---------------------------------|
@@ -69,34 +124,44 @@ Para cada funcionalidad, sigue este patrón:
 
 ---
 
-## 4. Resolución de Merge Conflicts
+## 6. Resolución de Merge Conflicts
 
-Si al hacer merge o al actualizar tu rama aparecen conflictos:
+Si al hacer merge, rebase o pull aparecen conflictos:
 
-1. Git marcará el archivo con secciones:
+1. Git marca los archivos con:
    ```diff
    <<<<<<< HEAD
    (tu código)
    =======
-   (código en main)
-   >>>>>>> main
+   (código en main o upstream)
+   >>>>>>> <rama>
    ```
 2. Edita manualmente para elegir o combinar cambios.
-3. Marca el conflicto como resuelto:
+3. Marca el archivo como resuelto:
    ```bash
    git add <archivo>
+   ```
+4. Si estabas en merge:
+   ```bash
    git commit -m "fix: resolver merge conflict en <archivo>"
-   git push origin feature/<acción>
+   ```
+   Si estabas en rebase:
+   ```bash
+   git rebase --continue
+   ```
+5. Envía tu rama limpia:
+   ```bash
+   git push origin feature/<tu-acción>
    ```
 
 ---
 
-## 5. Buenas prácticas
+## 7. Buenas prácticas
 
-- **Commits atómicos**: cada commit debe contener un solo cambio lógico.  
-- **Mensajes claros**: sigue [Conventional Commits](https://www.conventionalcommits.org/).  
-- **PRs pequeñas**: facilita la revisión.  
-- **Sincroniza frecuentemente**: actualiza `main` antes de crear ramas y antes de abrir PR.
+- **Commits atómicos**: un solo cambio lógico por commit.
+- **Mensajes claros**: sigue [Conventional Commits](https://www.conventionalcommits.org/).
+- **PRs pequeñas**: hacen la revisión más sencilla.
+- **Sincroniza frecuentemente**: evita desfasajes y reduces conflictos.
 
 ---
 
