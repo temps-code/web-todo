@@ -16,12 +16,21 @@
   <div class="container py-5">
     <h1 class="mb-4 text-center">Mis Tareas</h1>
 
-    <!-- Formulario -->
+    <!-- Formulario para agregar tarea -->
     <div class="input-group mb-3">
       <input type="text" id="taskInput" class="form-control"
              placeholder="Escribe una nueva tarea..." aria-label="Nueva tarea"/>
       <button class="btn btn-primary" id="addBtn" type="button">
         Agregar Tarea
+      </button>
+    </div>
+
+    <!-- Formulario para eliminar tarea por ID -->
+    <div class="input-group mb-4">
+      <input type="text" id="deleteIdInput" class="form-control"
+             placeholder="Ingresa el ID de la tarea a eliminar" aria-label="ID tarea a eliminar"/>
+      <button class="btn btn-danger" id="deleteByIdBtn" type="button">
+        Eliminar por ID
       </button>
     </div>
 
