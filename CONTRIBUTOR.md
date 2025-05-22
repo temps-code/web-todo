@@ -1,94 +1,103 @@
-# Contributor Guide for Web To-Do List
+# Guia para Contributors de Web To-Do List
 
-Este archivo describe los pasos que cada **contributor** debe seguir para participar en el proyecto **Web To-Do List**, junto con el flujo de trabajo y los roles.
-
----
-
-## 1. Puntos de la Exposición Teórica (para revisar)
-
-1. **¿Qué es Git y qué es GitHub?**  
-   - Git: sistema de control de versiones distribuido para gestionar el historial de tu código localmente.  
-   - GitHub: plataforma en la nube que aloja repositorios Git y facilita colaboración remota.
-
-2. **Diferencia entre Git y GitHub**  
-   - Git es la herramienta de versionado; GitHub es el servicio online que añade funcionalidades sociales (issues, PRs, CI/CD).
-
-3. **Importancia del control de versiones**  
-   - Registrar el historial de cambios y poder volver a versiones anteriores.  
-   - Trabajo simultáneo sin pisar cambios.  
-   - Rastreabilidad de autor y tiempo de cada modificación.
-
-4. **Conceptos clave**  
-   - **Branch (rama)**: línea independiente de desarrollo.  
-   - **Commit**: instantánea de cambios con mensaje descriptivo.  
-   - **Pull Request**: propuesta de fusión de una rama en otra con revisión y discusión.  
-   - **Merge Conflict**: conflictos cuando dos ramas modifican las mismas líneas; se resuelven editando manualmente los marcadores `<<<<<<<`.
-
-5. **Trabajo colaborativo**  
-   - Cada contributor trabaja en su fork, crea ramas de feature, envía PR y espera revisión.  
-   - Revisión de PRs por el Owner: comentarios, ajustes y merge.
-
-6. **Convenciones de codificación**  
-   - Nomenclatura uniforme (`feature/`, `fix/`), mensajes de commit con Conventional Commits.  
-   - Organización de carpetas (`index.html`, `styles.css`, `app.js`).
+Este documento está dirigido exclusivamente a los **contributors** que colaborarán en el proyecto **Web To-Do List**. Aquí encontrarás el flujo de trabajo, las ramas de desarrollo y las pautas para enviar tus cambios.
 
 ---
 
-## 2. Exposición Práctica: Flujo CRUD y Merge Conflict
+## 1. Configuración inicial
 
-### 2.1. Preparación del Mock API
+1. **Clona tu fork** (o el repositorio si tienes permisos de escritura directa). Puedes usar:
+   ```bash
+   # Con Git tradicional:
+   git clone https://github.com/<tu-usuario>/web-todo.git
 
-- Crear recurso `tasks` en MockAPI.io con campos:
-  - `id` (auto)  
-  - `text` (string)  
-  - `done` (boolean)
-- Base URL: `https://<TU_ID>.mockapi.io/api/v1/tasks`
+   # O (recomendado) con GitHub CLI para mayor facilidad:
+   gh repo clone <tu-usuario>/web-todo
 
-### 2.2. Ramas de desarrollo (una por cada acción)
+   cd web-todo
+   ```
+2. **Configura el upstream** (solo si trabajas con fork):
+   ```bash
+   git remote add upstream https://github.com/<owner-usuario>/web-todo.git
+   git fetch upstream
+   ```
 
-| Rama                        | Acción CRUD / Demo                   |
-|-----------------------------|--------------------------------------|
-| `feature/bootstrap-ui`      | Estructura inicial (HTML/CSS/JS)     |
-| `feature/create-task`       | Crear tarea (`POST`)                 |
-| `feature/read-tasks`        | Listar tareas (`GET`)                |
-| `feature/update-task`       | Actualizar tarea (`PUT`)             |
-| `feature/delete-task`       | Eliminar tarea (`DELETE`)            |
+---
+
+## 2. Flujo de trabajo por rama
+
+Para cada funcionalidad, sigue este patrón:
+
+1. **Actualiza `main`**:
+   ```bash
+   git switch main
+   git pull upstream main  # o `git pull origin main` si no usas fork
+   ```
+2. **Crea una rama específica**:
+   ```bash
+   git switch -c feature/<acción>  # ejemplo: feature/create-task
+   ```
+3. **Desarrolla tu feature**:
+   - Implementa solo la funcionalidad asignada.
+   - Mantén commits atómicos y claros.
+     ```bash
+     git add <archivos>
+     git commit -m "feat: descripción clara de tu cambio"
+     ```
+4. **Envía tus cambios al remoto**:
+   ```bash
+   git push origin feature/<acción>
+   ```
+5. **Abre un Pull Request** en GitHub:
+   - Base: `owner-usuario/web-todo:main`  
+   - Compare: tu rama `feature/<acción>`  
+   - Título: breve y descriptivo (`feat: create task endpoint`)  
+   - Descripción: explica qué hace tu cambio y cómo probarlo.
+
+---
+
+## 3. Ramas de desarrollo (una por cada acción CRUD)
+
+| Rama                          | Acción                          |
+|-------------------------------|---------------------------------|
+| `feature/bootstrap-ui`        | Estructura inicial (HTML/CSS/JS)|
+| `feature/create-task`         | Crear tarea (`POST /tasks`)     |
+| `feature/read-tasks`          | Listar tareas (`GET /tasks`)    |
+| `feature/update-task`         | Actualizar tarea (`PUT /tasks/:id`) |
+| `feature/delete-task`         | Eliminar tarea (`DELETE /tasks/:id`) |
 | `feature/merge-conflict-demo` | Demo y resolución de merge conflict |
 
-Para crear una rama:
-```bash
-# Desde main actualizado:
-git switch main
-# Crear rama para tu feature:
-git switch -c feature/<tu-acción>
-```
+---
 
-### 2.3. Workflow en Equipo (5 Personas)
+## 4. Resolución de Merge Conflicts
 
-1. **Owner** (tú):  
-   - Crea el repo `web-todo` y añade README, .gitignore, CONTRIBUTING.md y este CONTRIBUTOR.md.  
-   - Protege la rama `main` para exigir PRs.
+Si al hacer merge o al actualizar tu rama aparecen conflictos:
 
-2. **Contributors** (4 compañeros): se asignan rotativamente a las ramas de la sección 2.2.  
-   - Desarrollan solo la funcionalidad asignada.  
-   - `git add .`, `git commit -m "feat: descripción"` y `git push origin <rama>`.  
-   - Abren PR y solicitan revisión.
-
-3. **Merge Conflict Demo**:  
-   - Dos ramas cambian la misma línea en `styles.css`.  
-   - Se fusiona la primera, luego al fusionar la segunda aparece el conflicto.  
-   - Resolver editando `<<<<<<<`, elegir/combiar cambios, `git add` y `git commit`.
-
-4. **Rotación de Roles**:  
-   - Tras cada feature, se rota quién es Owner y quién Contributor para que todos experimenten ambos roles.
+1. Git marcará el archivo con secciones:
+   ```diff
+   <<<<<<< HEAD
+   (tu código)
+   =======
+   (código en main)
+   >>>>>>> main
+   ```
+2. Edita manualmente para elegir o combinar cambios.
+3. Marca el conflicto como resuelto:
+   ```bash
+   git add <archivo>
+   git commit -m "fix: resolver merge conflict en <archivo>"
+   git push origin feature/<acción>
+   ```
 
 ---
 
-Al finalizar, cada contributor habrá aprendido a:
-- Clonar el repo y configurar `upstream`.  
-- Crear ramas y aislar funcionalidades.  
-- Realizar commits atómicos con mensajes claros.  
-- Hacer push y abrir Pull Requests.  
-- Revisar PRs y resolver merge conflicts.
+## 5. Buenas prácticas
 
-¡Gracias por contribuir a **Web To-Do List**! 🎉
+- **Commits atómicos**: cada commit debe contener un solo cambio lógico.  
+- **Mensajes claros**: sigue [Conventional Commits](https://www.conventionalcommits.org/).  
+- **PRs pequeñas**: facilita la revisión.  
+- **Sincroniza frecuentemente**: actualiza `main` antes de crear ramas y antes de abrir PR.
+
+---
+
+¡Gracias por tu aporte al proyecto **Web To-Do List**! 🎉
